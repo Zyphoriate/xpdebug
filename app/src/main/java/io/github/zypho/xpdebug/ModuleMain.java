@@ -19,21 +19,32 @@ public class ModuleMain extends XposedModule {
 
     private boolean toastShown = false;
 
+    // Log to both Xposed framework + adb logcat
+    private void debug(String msg) {
+        log(Log.INFO, TAG, msg);
+        Log.i(TAG, msg);
+    }
+
+    private void debug(String msg, Throwable tr) {
+        log(Log.ERROR, TAG, msg, tr);
+        Log.e(TAG, msg, tr);
+    }
+
     @Override
     public void onModuleLoaded(ModuleLoadedParam param) {
-        log(Log.INFO, TAG, "Process: " + param.getProcessName());
-        log(Log.INFO, TAG, "Framework: " + getFrameworkName() + " v" + getFrameworkVersion());
-        log(Log.INFO, TAG, "API: " + getApiVersion());
+        debug("Process: " + param.getProcessName());
+        debug("Framework: " + getFrameworkName() + " v" + getFrameworkVersion());
+        debug("API: " + getApiVersion());
     }
 
     @Override
     public void onPackageLoaded(PackageLoadedParam param) {
-        log(Log.INFO, TAG, "Package loaded: " + param.getPackageName());
+        debug("Package loaded: " + param.getPackageName());
     }
 
     @Override
     public void onPackageReady(PackageReadyParam param) {
-        log(Log.INFO, TAG, "Package ready: " + param.getPackageName());
+        debug("Package ready: " + param.getPackageName());
 
         if (!param.isFirstPackage()) return;
 
@@ -41,9 +52,9 @@ public class ModuleMain extends XposedModule {
             hookActivityLifecycle();
             hookDialogLifecycle();
             hookPopupWindow();
-            log(Log.INFO, TAG, "All hooks installed for " + param.getPackageName());
+            debug("All hooks installed for " + param.getPackageName());
         } catch (Exception e) {
-            log(Log.ERROR, TAG, "Failed to install hooks", e);
+            debug("Failed to install hooks", e);
         }
     }
 
@@ -54,18 +65,18 @@ public class ModuleMain extends XposedModule {
                 .intercept(chain -> {
                     Activity a = (Activity) chain.getThisObject();
                     Intent intent = a.getIntent();
-                    log(Log.INFO, TAG, "┌──────────────────────────────────────────");
-                    log(Log.INFO, TAG, "│ [Activity] onCreate");
-                    log(Log.INFO, TAG, "│   Class  : " + a.getClass().getName());
-                    log(Log.INFO, TAG, "│   Intent : " + (intent != null ? intent.toString() : "null"));
-                    log(Log.INFO, TAG, "│   TaskId : " + a.getTaskId());
+                    debug("┌──────────────────────────────────────────");
+                    debug("│ [Activity] onCreate");
+                    debug("│   Class  : " + a.getClass().getName());
+                    debug("│   Intent : " + (intent != null ? intent.toString() : "null"));
+                    debug("│   TaskId : " + a.getTaskId());
                     Bundle extras = (intent != null) ? intent.getExtras() : null;
                     if (extras != null && !extras.isEmpty()) {
                         for (String key : extras.keySet()) {
-                            log(Log.INFO, TAG, "│   Extra  : " + key + " = " + extras.get(key));
+                            debug("│   Extra  : " + key + " = " + extras.get(key));
                         }
                     }
-                    log(Log.INFO, TAG, "└──────────────────────────────────────────");
+                    debug("└──────────────────────────────────────────");
                     showToastOnce(a);
                     return chain.proceed();
                 });
@@ -73,35 +84,35 @@ public class ModuleMain extends XposedModule {
         hook(Activity.class.getDeclaredMethod("onStart"))
                 .intercept(chain -> {
                     Activity a = (Activity) chain.getThisObject();
-                    log(Log.INFO, TAG, "▶ [Activity] onStart  : " + a.getClass().getName());
+                    debug("▶ [Activity] onStart  : " + a.getClass().getName());
                     return chain.proceed();
                 });
 
         hook(Activity.class.getDeclaredMethod("onResume"))
                 .intercept(chain -> {
                     Activity a = (Activity) chain.getThisObject();
-                    log(Log.INFO, TAG, "▶▶ [Activity] onResume : " + a.getClass().getName());
+                    debug("▶▶ [Activity] onResume : " + a.getClass().getName());
                     return chain.proceed();
                 });
 
         hook(Activity.class.getDeclaredMethod("onPause"))
                 .intercept(chain -> {
                     Activity a = (Activity) chain.getThisObject();
-                    log(Log.INFO, TAG, "⏸ [Activity] onPause  : " + a.getClass().getName());
+                    debug("⏸ [Activity] onPause  : " + a.getClass().getName());
                     return chain.proceed();
                 });
 
         hook(Activity.class.getDeclaredMethod("onStop"))
                 .intercept(chain -> {
                     Activity a = (Activity) chain.getThisObject();
-                    log(Log.INFO, TAG, "⏹ [Activity] onStop   : " + a.getClass().getName());
+                    debug("⏹ [Activity] onStop   : " + a.getClass().getName());
                     return chain.proceed();
                 });
 
         hook(Activity.class.getDeclaredMethod("onDestroy"))
                 .intercept(chain -> {
                     Activity a = (Activity) chain.getThisObject();
-                    log(Log.INFO, TAG, "✕ [Activity] onDestroy: " + a.getClass().getName());
+                    debug("✕ [Activity] onDestroy: " + a.getClass().getName());
                     return chain.proceed();
                 });
 
@@ -109,8 +120,8 @@ public class ModuleMain extends XposedModule {
                 .intercept(chain -> {
                     Activity a = (Activity) chain.getThisObject();
                     Intent i = (Intent) chain.getArg(0);
-                    log(Log.INFO, TAG, "↻ [Activity] onNewIntent: " + a.getClass().getName());
-                    log(Log.INFO, TAG, "   New Intent: " + (i != null ? i.toString() : "null"));
+                    debug("↻ [Activity] onNewIntent: " + a.getClass().getName());
+                    debug("   New Intent: " + (i != null ? i.toString() : "null"));
                     return chain.proceed();
                 });
     }
@@ -121,41 +132,40 @@ public class ModuleMain extends XposedModule {
         hook(Dialog.class.getDeclaredMethod("show"))
                 .intercept(chain -> {
                     Dialog d = (Dialog) chain.getThisObject();
-                    log(Log.INFO, TAG, "┌──────────────────────────────────────────");
-                    log(Log.INFO, TAG, "│ [Dialog] show");
-                    log(Log.INFO, TAG, "│   Class  : " + d.getClass().getName());
+                    debug("┌──────────────────────────────────────────");
+                    debug("│ [Dialog] show");
+                    debug("│   Class  : " + d.getClass().getName());
                     if (d.getOwnerActivity() != null) {
-                        log(Log.INFO, TAG, "│   Owner  : " + d.getOwnerActivity().getClass().getName());
+                        debug("│   Owner  : " + d.getOwnerActivity().getClass().getName());
                     }
                     if (d.getContext() != null) {
-                        log(Log.INFO, TAG, "│   Context: " + d.getContext().getClass().getName());
+                        debug("│   Context: " + d.getContext().getClass().getName());
                     }
-                    log(Log.INFO, TAG, "└──────────────────────────────────────────");
+                    debug("└──────────────────────────────────────────");
                     return chain.proceed();
                 });
 
         hook(Dialog.class.getDeclaredMethod("dismiss"))
                 .intercept(chain -> {
                     Dialog d = (Dialog) chain.getThisObject();
-                    log(Log.INFO, TAG, "✕ [Dialog] dismiss: " + d.getClass().getName());
+                    debug("✕ [Dialog] dismiss: " + d.getClass().getName());
                     return chain.proceed();
                 });
 
         hook(Dialog.class.getDeclaredMethod("hide"))
                 .intercept(chain -> {
                     Dialog d = (Dialog) chain.getThisObject();
-                    log(Log.INFO, TAG, "− [Dialog] hide   : " + d.getClass().getName());
+                    debug("− [Dialog] hide   : " + d.getClass().getName());
                     return chain.proceed();
                 });
 
-        // AlertDialog.Builder.show() — catches build-and-show pattern
         hook(AlertDialog.Builder.class.getDeclaredMethod("show"))
                 .intercept(chain -> {
                     AlertDialog d = (AlertDialog) chain.proceed();
-                    log(Log.INFO, TAG, "┌──────────────────────────────────────────");
-                    log(Log.INFO, TAG, "│ [AlertDialog] Builder.show()");
-                    log(Log.INFO, TAG, "│   Class  : " + d.getClass().getName());
-                    log(Log.INFO, TAG, "└──────────────────────────────────────────");
+                    debug("┌──────────────────────────────────────────");
+                    debug("│ [AlertDialog] Builder.show()");
+                    debug("│   Class  : " + d.getClass().getName());
+                    debug("└──────────────────────────────────────────");
                     return d;
                 });
     }
@@ -173,26 +183,26 @@ public class ModuleMain extends XposedModule {
         hook(popupWindowClass.getDeclaredMethod("showAtLocation",
                 android.view.View.class, int.class, int.class, int.class))
                 .intercept(chain -> {
-                    log(Log.INFO, TAG, "┌──────────────────────────────────────────");
-                    log(Log.INFO, TAG, "│ [PopupWindow] showAtLocation");
-                    log(Log.INFO, TAG, "│   Class  : " + chain.getThisObject().getClass().getName());
-                    log(Log.INFO, TAG, "└──────────────────────────────────────────");
+                    debug("┌──────────────────────────────────────────");
+                    debug("│ [PopupWindow] showAtLocation");
+                    debug("│   Class  : " + chain.getThisObject().getClass().getName());
+                    debug("└──────────────────────────────────────────");
                     return chain.proceed();
                 });
 
         hook(popupWindowClass.getDeclaredMethod("showAsDropDown",
                 android.view.View.class, int.class, int.class, int.class))
                 .intercept(chain -> {
-                    log(Log.INFO, TAG, "┌──────────────────────────────────────────");
-                    log(Log.INFO, TAG, "│ [PopupWindow] showAsDropDown");
-                    log(Log.INFO, TAG, "│   Class  : " + chain.getThisObject().getClass().getName());
-                    log(Log.INFO, TAG, "└──────────────────────────────────────────");
+                    debug("┌──────────────────────────────────────────");
+                    debug("│ [PopupWindow] showAsDropDown");
+                    debug("│   Class  : " + chain.getThisObject().getClass().getName());
+                    debug("└──────────────────────────────────────────");
                     return chain.proceed();
                 });
 
         hook(popupWindowClass.getDeclaredMethod("dismiss"))
                 .intercept(chain -> {
-                    log(Log.INFO, TAG, "✕ [PopupWindow] dismiss: " + chain.getThisObject().getClass().getName());
+                    debug("✕ [PopupWindow] dismiss: " + chain.getThisObject().getClass().getName());
                     return chain.proceed();
                 });
     }
