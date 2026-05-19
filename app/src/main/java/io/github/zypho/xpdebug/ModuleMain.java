@@ -10,8 +10,6 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-
 import io.github.libxposed.api.XposedModule;
 import io.github.libxposed.api.XposedModuleInterface;
 
@@ -22,19 +20,19 @@ public class ModuleMain extends XposedModule {
     private boolean toastShown = false;
 
     @Override
-    public void onModuleLoaded(@NonNull ModuleLoadedParam param) {
+    public void onModuleLoaded(ModuleLoadedParam param) {
         log(Log.INFO, TAG, "Process: " + param.getProcessName());
         log(Log.INFO, TAG, "Framework: " + getFrameworkName() + " v" + getFrameworkVersion());
         log(Log.INFO, TAG, "API: " + getApiVersion());
     }
 
     @Override
-    public void onPackageLoaded(@NonNull PackageLoadedParam param) {
+    public void onPackageLoaded(PackageLoadedParam param) {
         log(Log.INFO, TAG, "Package loaded: " + param.getPackageName());
     }
 
     @Override
-    public void onPackageReady(@NonNull PackageReadyParam param) {
+    public void onPackageReady(PackageReadyParam param) {
         log(Log.INFO, TAG, "Package ready: " + param.getPackageName());
 
         if (!param.isFirstPackage()) return;
