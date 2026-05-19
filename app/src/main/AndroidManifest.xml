@@ -12,14 +12,8 @@
             android:name="xposedmodule"
             android:value="true" />
         <meta-data
-            android:name="xposedminapiversion"
-            android:value="101" />
-        <meta-data
-            android:name="xposedtargetapiversion"
-            android:value="101" />
-        <meta-data
-            android:name="xposedstaticScope"
-            android:value="false" />
+            android:name="xposeddescription"
+            android:value="Activity/Dialog debug monitor" />
 
     </application>
 </manifest>
