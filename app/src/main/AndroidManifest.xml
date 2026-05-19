@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:description="@android:string/unknownName"
+        android:label="Xposed Debug"
+        android:theme="@android:style/Theme.DeviceDefault"
+        tools:ignore="MissingApplicationIcon">
+
+        <meta-data
+            android:name="xposedmodule"
+            android:value="true" />
+        <meta-data
+            android:name="xposedminapiversion"
+            android:value="101" />
+        <meta-data
+            android:name="xposedtargetapiversion"
+            android:value="101" />
+        <meta-data
+            android:name="xposedstaticScope"
+            android:value="false" />
+
+    </application>
+</manifest>
